@@ -8,7 +8,7 @@ from rest_framework import status
 
 # GET and POST request:
 @api_view(['GET', 'POST'])
-def drink_list(request):
+def drink_list(request, format=None):
     # if GET request:
     if request.method == 'GET':
         # get all the drinks
@@ -29,7 +29,7 @@ def drink_list(request):
 
 # build drink detail view:
 @api_view(['GET', 'PUT', 'DELETE'])
-def drink_detail(request, id):
+def drink_detail(request, id, format=None):
     # check if the requested ID is valid in range of existing IDs
     try:
         drink = Drink.objects.get(pk=id) # check if this is valid in range of existing IDs
