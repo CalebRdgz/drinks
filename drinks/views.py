@@ -12,11 +12,12 @@ def drink_list(request):
     # if GET request:
     if request.method == 'GET':
         # get all the drinks
-        drinks = Drink.objects.all()
         # serialize the drinks
-        serializer = DrinkSerializer(drinks, many=True) # create reference to the object
-        # return JSON
-        return JsonResponse({"drinks": serializer.data})
+        # return JSON Response in Django REST Framework HTML view
+        drinks = Drink.objects.all()
+        serializer = DrinkSerializer(drinks, many=True)
+        return Response(serializer.data)
+
     # if POST request:
     if request.method == 'POST':
         # add a drink to database:
@@ -25,3 +26,29 @@ def drink_list(request):
         if serializer.is_valid(): 
             serializer.save() # save the data if it is valid
             return Response(serializer.data, status=status.HTTP_201_CREATED) # return a response with a status code
+
+# build drink detail view:
+@api_view(['GET', 'PUT', 'DELETE'])
+def drink_detail(request, id):
+    # check if the requested ID is valid in range of existing IDs
+    try:
+        drink = Drink.objects.get(pk=id) # check if this is valid in range of existing IDs
+    except Drink.DoesNotExist: # if something goes wrong with the request:
+        return Response(status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = DrinkSerializer(drink)
+        return Response(serializer.data)
+
+    # update existing data:
+    elif request.method == 'PUT':
+        serializer = DrinkSerializer(drink, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # delete requested data:
+    elif request.method == 'DELETE':
+        drink.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
